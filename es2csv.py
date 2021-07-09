@@ -94,7 +94,7 @@ class Es2csv:
         if self.opts.query.startswith('@'):
             query_file = self.opts.query[1:]
             if os.path.exists(query_file):
-                with codecs.open(query_file, mode='r', encoding='utf-8') as f:
+                with codecs.open(query_file, mode='r', encoding='utf-8-sig') as f:
                     self.opts.query = f.read()
             else:
                 print('No such file: {}.'.format(query_file))
@@ -113,12 +113,12 @@ class Es2csv:
 
         if '_all' not in self.opts.fields:
             search_args['_source_include'] = ','.join(self.opts.fields)
-            self.csv_headers.extend([unicode(field, "utf-8") for field in self.opts.fields if '*' not in field])
+            self.csv_headers.extend([unicode(field, "utf-8-sig") for field in self.opts.fields if '*' not in field])
 
         if self.opts.debug_mode:
             print('Using these indices: {}.'.format(', '.join(self.opts.index_prefixes)))
             print('Query[{0[0]}]: {0[1]}.'.format(
-                ('Query DSL', json.dumps(query, ensure_ascii=False).encode('utf8')) if self.opts.raw_query else ('Lucene', query))
+                ('Query DSL', json.dumps(query, ensure_ascii=False).encode('utf8sig')) if self.opts.raw_query else ('Lucene', query))
             )
             print('Output field(s): {}.'.format(', '.join(self.opts.fields)))
             print('Sorting by: {}.'.format(', '.join(self.opts.sort)))
@@ -128,11 +128,11 @@ class Es2csv:
 
         print('Found {} results.'.format(self.num_results))
         if self.opts.debug_mode:
-            print(json.dumps(res, ensure_ascii=False).encode('utf8'))
+            print(json.dumps(res, ensure_ascii=False).encode('utf8sig'))
 
         if self.num_results > 0:
-            codecs.open(self.opts.output_file, mode='w', encoding='utf-8').close()
-            codecs.open(self.tmp_file, mode='w', encoding='utf-8').close()
+            codecs.open(self.opts.output_file, mode='w', encoding='utf-8-sig').close()
+            codecs.open(self.tmp_file, mode='w', encoding='utf-8-sig').close()
 
             hit_list = []
             total_lines = 0
@@ -196,7 +196,7 @@ class Es2csv:
                 except:
                     out[header] = source
 
-        with codecs.open(self.tmp_file, mode='a', encoding='utf-8') as tmp_file:
+        with codecs.open(self.tmp_file, mode='a', encoding='utf-8-sig') as tmp_file:
             for hit in hit_list:
                 out = {field: hit[field] for field in META_FIELDS} if self.opts.meta_fields else {}
                 if '_source' in hit and len(hit['_source']) > 0:
@@ -206,9 +206,9 @@ class Es2csv:
 
     def write_to_csv(self):
         if self.num_results > 0:
-            self.num_results = sum(1 for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8'))
+            self.num_results = sum(1 for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8-sig'))
             if self.num_results > 0:
-                output_file = codecs.open(self.opts.output_file, mode='a', encoding='utf-8')
+                output_file = codecs.open(self.opts.output_file, mode='a', encoding='utf-8-sig')
                 csv_writer = csv.DictWriter(output_file, fieldnames=self.csv_headers)
                 csv_writer.writeheader()
                 timer = 0
@@ -222,7 +222,7 @@ class Es2csv:
                            ]
                 bar = progressbar.ProgressBar(widgets=widgets, maxval=self.num_results).start()
 
-                for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8'):
+                for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8-sig'):
                     timer += 1
                     bar.update(timer)
                     csv_writer.writerow(json.loads(line))
