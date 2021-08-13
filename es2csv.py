@@ -132,7 +132,7 @@ class Es2csv:
 
         if self.num_results > 0:
             codecs.open(self.opts.output_file, mode='w', encoding='utf-8-sig').close()
-            codecs.open(self.tmp_file, mode='w', encoding='utf-8-sig').close()
+            codecs.open(self.tmp_file, mode='w', encoding='utf-8').close()
 
             hit_list = []
             total_lines = 0
@@ -196,7 +196,7 @@ class Es2csv:
                 except:
                     out[header] = source
 
-        with codecs.open(self.tmp_file, mode='a', encoding='utf-8-sig') as tmp_file:
+        with codecs.open(self.tmp_file, mode='a', encoding='utf-8') as tmp_file:
             for hit in hit_list:
                 out = {field: hit[field] for field in META_FIELDS} if self.opts.meta_fields else {}
                 if '_source' in hit and len(hit['_source']) > 0:
